@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:quiz_app/views/widgets/profile_grade.dart';
+import 'package:quiz_app/features/leaderboard/widgets/profile_grade.dart';
 import 'dart:math';
 
-import 'package:quiz_app/views/widgets/profilebar.dart';
+import 'package:quiz_app/features/leaderboard/widgets/profilebar.dart';
 
 class Ranking extends StatelessWidget {
   const Ranking({super.key});

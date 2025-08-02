@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:http/io_client.dart';
-import '../models/question.dart';
-import '../notifier/store_token.dart';
+import '../../../core/constants/models/question.dart';
+import '../../../core/state/store_token.dart';
 
 class QuestionService {
   Future<List<Question>?> getQuestions() async {

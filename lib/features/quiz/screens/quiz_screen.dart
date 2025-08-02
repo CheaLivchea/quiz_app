@@ -2,13 +2,13 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
-import 'package:quiz_app/views/pages/home_page.dart';
-import 'package:quiz_app/views/pages/loading_page.dart';
-import 'package:quiz_app/views/pages/result.dart';
+import 'package:quiz_app/features/home_page/screens/home_page.dart';
+import 'package:quiz_app/shared/widgets/loading_page.dart';
+import 'package:quiz_app/features/result/screens/result.dart';
 
-import '../../constants/quiz_data.dart';
-import '../../models/question.dart';
-import '../../services/question_service.dart';
+import '../../../core/constants/quiz_data.dart';
+import '../../../core/constants/models/question.dart';
+import '../services/question_service.dart';
 import '../widgets/answer_btn.dart';
 import '../widgets/progress_bar.dart';
 

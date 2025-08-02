@@ -1,12 +1,11 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:quiz_app/views/pages/profile.dart';
-import 'package:quiz_app/views/pages/quiz_screen.dart';
-import 'package:quiz_app/views/pages/ranking.dart';
-import 'package:quiz_app/views/pages/welcome_page.dart';
+import 'package:quiz_app/features/profile/screens/profile.dart';
+import 'package:quiz_app/features/quiz/screens/quiz_screen.dart';
+import 'package:quiz_app/features/leaderboard/screens/leaderboard.dart';
+import 'package:quiz_app/features/welcome/screens/welcome_page.dart';
 
-import 'leaderboard.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:quiz_app/views/widgets/summary_answer.dart';
-import 'package:quiz_app/views/pages/home_page.dart';
+import 'package:quiz_app/features/result/widgets/summary_answer.dart';
+import 'package:quiz_app/features/home_page/screens/home_page.dart';
 
 class Result extends StatefulWidget {
   const Result({super.key, required this.score, required this.summary});

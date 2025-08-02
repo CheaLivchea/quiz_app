@@ -1,14 +1,75 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:quiz_app/views/pages/login.dart';
+import 'package:provider/provider.dart';
+import 'package:quiz_app/features/auth/providers/auth_provider.dart';
+import 'package:quiz_app/features/auth/screens/sign_in.dart';
 
-import 'home_page.dart';
+class Login extends StatefulWidget {
+  const Login({super.key});
 
-TextEditingController textController = TextEditingController();
+  @override
+  State<Login> createState() => _LoginState();
+}
 
-class SignIn extends StatelessWidget {
-  const SignIn({super.key});
+class _LoginState extends State<Login> {
+  TextEditingController phoneNumberController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+  bool _isLoading = false;
+
+  Future<void> _handleLogin() async {
+    if (_isLoading) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final authProvider = context.read<AuthProvider>();
+      bool success = await authProvider.login(
+        phoneNumberController.text.trim(),
+        passwordController.text.trim(),
+      );
+
+      if (!mounted) return;
+
+      if (!success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(authProvider.error ?? 'Login failed')),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    // getToken();
+  }
+
+  // void getToken() async {
+  //   final SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   final savedToken = prefs.getString(HoldToken.name);
+  //   if (savedToken != null) {
+  //     token.value = savedToken;
+  //     print('Token restored: $savedToken');
+  //   } else {
+  //     print(' No token found in SharedPreferences');
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -34,12 +95,9 @@ class SignIn extends StatelessWidget {
               ),
               SizedBox(height: 30),
               TextField(
-                controller: textController,
+                controller: phoneNumberController,
                 decoration: InputDecoration(
-                  prefixIcon: Icon(
-                    Icons.messenger_outline,
-                    color: Colors.white,
-                  ),
+                  prefixIcon: Icon(Icons.phone_outlined, color: Colors.white),
                   hintText: 'Phone Number',
                   hintStyle: GoogleFonts.poppins(
                     fontSize: 16,
@@ -69,7 +127,7 @@ class SignIn extends StatelessWidget {
 
               SizedBox(height: 30),
               TextField(
-                controller: textController,
+                controller: passwordController,
                 decoration: InputDecoration(
                   prefixIcon: Icon(Icons.lock_outline, color: Colors.white),
                   hintText: 'Password',
@@ -100,60 +158,46 @@ class SignIn extends StatelessWidget {
                     color: Colors.white,
                   ),
                 ),
+                obscureText: true,
                 style: GoogleFonts.poppins(fontSize: 16, color: Colors.white),
               ),
               SizedBox(height: 30),
-              TextField(
-                controller: textController,
-                decoration: InputDecoration(
-                  prefixIcon: Icon(Icons.lock_outline, color: Colors.white),
-                  hintText: 'Confirm Password',
-                  hintStyle: GoogleFonts.poppins(
-                    fontSize: 16,
-                    color: Colors.white,
-                  ),
-
-                  border: OutlineInputBorder(
-                    // Border style
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: Colors.white),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Text(
+                    "Forgot password?",
+                    style: GoogleFonts.poppins(
+                      fontSize: 16,
                       color: Colors.white,
-                    ), // border color when not focused
+                    ),
                   ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(
-                      color: Colors.white,
-                    ), // border color when focused
-                  ),
-                  suffixIcon: Icon(
-                    Icons.remove_red_eye_outlined,
-                    color: Colors.white,
-                  ),
-                ),
-                style: GoogleFonts.poppins(fontSize: 16, color: Colors.white),
+                ],
               ),
               SizedBox(height: 50),
               FilledButton(
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => HomePage()),
-                  );
-                },
-                style: FilledButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  minimumSize: Size(double.infinity, 50),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                onPressed: _isLoading ? null : _handleLogin,
+
+                style: ButtonStyle(
+                  backgroundColor: WidgetStateProperty.resolveWith((states) {
+                    if (states.contains(WidgetState.pressed)) {
+                      // For tap/press feedback
+                      return Colors.grey.shade400; // Example pressed color
+                    }
+
+                    return Colors.white; // Default color
+                  }),
+                  minimumSize: WidgetStateProperty.all(
+                    const Size(double.infinity, 50),
+                  ),
+                  shape: WidgetStateProperty.all(
+                    RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
                 ),
                 child: Text(
-                  "Sign up",
+                  "Login",
                   style: GoogleFonts.poppins(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -207,7 +251,7 @@ class SignIn extends StatelessWidget {
               SizedBox(height: 30),
               RichText(
                 text: TextSpan(
-                  text: "Already have an account? ",
+                  text: "Don't have an account? ",
                   style: GoogleFonts.poppins(
                     fontSize: 16,
                     color: Colors.white,
@@ -215,7 +259,7 @@ class SignIn extends StatelessWidget {
                   ),
                   children: [
                     TextSpan(
-                      text: "Login",
+                      text: "Sign Up",
                       style: GoogleFonts.poppins(
                         fontSize: 16,
                         color: Colors.white,
@@ -225,7 +269,7 @@ class SignIn extends StatelessWidget {
                         ..onTap = () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => Login()),
+                            MaterialPageRoute(builder: (context) => SignIn()),
                           );
                         },
                     ),

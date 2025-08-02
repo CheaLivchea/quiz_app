@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
-import 'package:quiz_app/views/pages/login.dart';
-import 'package:quiz_app/views/pages/sign_in.dart';
+import 'package:quiz_app/features/auth/screens/login.dart';
+import 'package:quiz_app/features/auth/screens/sign_in.dart';
 
 class WelcomePage extends StatelessWidget {
   const WelcomePage({super.key});

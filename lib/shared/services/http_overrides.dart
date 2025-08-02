@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 
-import '../main.dart';
+import '../../main.dart';
 
 class MyHttpOverrides extends HttpOverrides {
   @override

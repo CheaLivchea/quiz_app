@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
-import 'package:quiz_app/services/question_service.dart';
-import 'package:quiz_app/views/pages/quiz_screen.dart';
+import 'package:quiz_app/features/quiz/services/question_service.dart';
+import 'package:quiz_app/features/quiz/screens/quiz_screen.dart';
 
 class LoadingPage extends StatefulWidget {
   const LoadingPage({super.key});
