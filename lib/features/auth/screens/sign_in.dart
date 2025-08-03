@@ -35,9 +35,10 @@ class SignIn extends StatelessWidget {
               SizedBox(height: 30),
               TextField(
                 controller: textController,
+                cursorColor: Colors.white,
                 decoration: InputDecoration(
                   prefixIcon: Icon(
-                    Icons.messenger_outline,
+                    Icons.phone_outlined,
                     color: Colors.white,
                   ),
                   hintText: 'Phone Number',
@@ -70,6 +71,7 @@ class SignIn extends StatelessWidget {
               SizedBox(height: 30),
               TextField(
                 controller: textController,
+                cursorColor: Colors.white,
                 decoration: InputDecoration(
                   prefixIcon: Icon(Icons.lock_outline, color: Colors.white),
                   hintText: 'Password',
@@ -105,6 +107,7 @@ class SignIn extends StatelessWidget {
               SizedBox(height: 30),
               TextField(
                 controller: textController,
+                cursorColor: Colors.white,
                 decoration: InputDecoration(
                   prefixIcon: Icon(Icons.lock_outline, color: Colors.white),
                   hintText: 'Confirm Password',

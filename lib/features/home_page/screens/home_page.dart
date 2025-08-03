@@ -1,10 +1,10 @@
-import 'package:flutter/gestures.dart';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:quiz_app/features/auth/widgets/logout.dart';
 import 'package:quiz_app/features/profile/screens/profile.dart';
 import 'package:quiz_app/features/quiz/screens/quiz_screen.dart';
 import 'package:quiz_app/features/leaderboard/screens/leaderboard.dart';
-import 'package:quiz_app/features/welcome/screens/welcome_page.dart';
 
 
 class HomePage extends StatelessWidget {
@@ -171,23 +171,8 @@ class HomePage extends StatelessWidget {
                     ),
                   ),
                   SizedBox(height: 300),
-                  ListTile(
-                    leading: Icon(Icons.logout_sharp, color: Color(0xFF4B4B6A)),
-                    title: Text(
-                      "Logout",
-                      style: GoogleFonts.lato(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF282433),
-                      ),
-                    ),
-                    onTap: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => WelcomePage()),
-                      );
-                    },
-                  ),
+                  Logout(),
+                
                 ],
               ),
             ),

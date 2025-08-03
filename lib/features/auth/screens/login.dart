@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:quiz_app/features/auth/providers/auth_provider.dart';
 import 'package:quiz_app/features/auth/screens/sign_in.dart';
+import 'package:quiz_app/features/home_page/screens/home_page.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -15,6 +16,7 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   TextEditingController phoneNumberController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
+  bool _showPassword = true;
   bool _isLoading = false;
 
   Future<void> _handleLogin() async {
@@ -26,20 +28,33 @@ class _LoginState extends State<Login> {
 
     try {
       final authProvider = context.read<AuthProvider>();
+      String phoneNumber = phoneNumberController.text.trim();
+      if (phoneNumber.startsWith('0')) {
+        phoneNumber = phoneNumber.substring(1);
+        
+      }
+      
       bool success = await authProvider.login(
-        phoneNumberController.text.trim(),
+        phoneNumber,
         passwordController.text.trim(),
       );
+      
 
       if (!mounted) return;
 
-      if (!success) {
+      if (success) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const HomePage()),
+          (route) => false,
+        );
+      } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(authProvider.error ?? 'Login failed')),
         );
       }
     } catch (e) {
-      if (!mounted) return;
+     
 
       ScaffoldMessenger.of(
         context,
@@ -52,24 +67,6 @@ class _LoginState extends State<Login> {
       }
     }
   }
-
-  @override
-  void initState() {
-    super.initState();
-
-    // getToken();
-  }
-
-  // void getToken() async {
-  //   final SharedPreferences prefs = await SharedPreferences.getInstance();
-  //   final savedToken = prefs.getString(HoldToken.name);
-  //   if (savedToken != null) {
-  //     token.value = savedToken;
-  //     print('Token restored: $savedToken');
-  //   } else {
-  //     print(' No token found in SharedPreferences');
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -96,6 +93,7 @@ class _LoginState extends State<Login> {
               SizedBox(height: 30),
               TextField(
                 controller: phoneNumberController,
+                cursorColor: Colors.white,
                 decoration: InputDecoration(
                   prefixIcon: Icon(Icons.phone_outlined, color: Colors.white),
                   hintText: 'Phone Number',
@@ -128,6 +126,7 @@ class _LoginState extends State<Login> {
               SizedBox(height: 30),
               TextField(
                 controller: passwordController,
+                cursorColor: Colors.white,
                 decoration: InputDecoration(
                   prefixIcon: Icon(Icons.lock_outline, color: Colors.white),
                   hintText: 'Password',
@@ -153,12 +152,20 @@ class _LoginState extends State<Login> {
                       color: Colors.white,
                     ), // border color when focused
                   ),
-                  suffixIcon: Icon(
-                    Icons.remove_red_eye_outlined,
-                    color: Colors.white,
+                  suffixIcon: IconButton(
+                    onPressed: () {
+                      setState(() {
+                        _showPassword = !_showPassword;
+                      });
+                    },
+                    icon: Icon(
+                      _showPassword ? Icons.visibility_off : Icons.visibility,
+
+                      color: Colors.white,
+                    ),
                   ),
                 ),
-                obscureText: true,
+                obscureText: _showPassword ? true : false,
                 style: GoogleFonts.poppins(fontSize: 16, color: Colors.white),
               ),
               SizedBox(height: 30),
