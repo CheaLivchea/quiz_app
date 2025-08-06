@@ -2,13 +2,85 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:quiz_app/features/auth/screens/login.dart';
-
 import '../../home_page/screens/home_page.dart';
+import 'package:quiz_app/features/auth/screens/send_otp.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
-TextEditingController textController = TextEditingController();
-
-class SignIn extends StatelessWidget {
+class SignIn extends StatefulWidget {
   const SignIn({super.key});
+
+  @override
+  State<SignIn> createState() => _SignInState();
+}
+
+class _SignInState extends State<SignIn> {
+  final TextEditingController phoneController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
+  bool _isLoading = false;
+  String _error = '';
+  bool _passwordVisible = false;
+  bool _confirmPasswordVisible = false;
+
+  void _handleSendOtp() async {
+    setState(() {
+      _error = '';
+      _isLoading = true;
+    });
+    final phone = phoneController.text.trim();
+    final password = passwordController.text.trim();
+    final confirmPassword = confirmPasswordController.text.trim();
+    if (phone.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
+      setState(() {
+        _isLoading = false;
+      });
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Please fill all fields.')));
+      return;
+    }
+    if (password != confirmPassword) {
+      setState(() {
+        _isLoading = false;
+      });
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Passwords do not match.')));
+      return;
+    }
+    // Call send OTP API
+    try {
+      final response = await http.post(
+        Uri.parse(
+          'https://your-api-url.com/send-otp',
+        ), // Replace with your actual endpoint
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'phone': phone}),
+      );
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200 && data['success'] == true) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => SendOTP(phone: phone, password: password),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(data['message'] ?? 'Internal Server Error')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Internal Server Error')));
+    }
+    setState(() {
+      _isLoading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,43 +106,34 @@ class SignIn extends StatelessWidget {
               ),
               SizedBox(height: 30),
               TextField(
-                controller: textController,
+                controller: phoneController,
                 cursorColor: Colors.white,
                 decoration: InputDecoration(
-                  prefixIcon: Icon(
-                    Icons.phone_outlined,
-                    color: Colors.white,
-                  ),
+                  prefixIcon: Icon(Icons.phone_outlined, color: Colors.white),
                   hintText: 'Phone Number',
                   hintStyle: GoogleFonts.poppins(
                     fontSize: 16,
                     color: Colors.white,
                   ),
-
                   border: OutlineInputBorder(
-                    // Border style
                     borderRadius: BorderRadius.circular(8),
                     borderSide: BorderSide(color: Colors.white),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(
-                      color: Colors.white,
-                    ), // border color when not focused
+                    borderSide: BorderSide(color: Colors.white),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(
-                      color: Colors.white,
-                    ), // border color when focused
+                    borderSide: BorderSide(color: Colors.white),
                   ),
                 ),
                 style: GoogleFonts.poppins(fontSize: 16, color: Colors.white),
               ),
-
               SizedBox(height: 30),
               TextField(
-                controller: textController,
+                controller: passwordController,
+                obscureText: !_passwordVisible,
                 cursorColor: Colors.white,
                 decoration: InputDecoration(
                   prefixIcon: Icon(Icons.lock_outline, color: Colors.white),
@@ -79,34 +142,38 @@ class SignIn extends StatelessWidget {
                     fontSize: 16,
                     color: Colors.white,
                   ),
-
                   border: OutlineInputBorder(
-                    // Border style
                     borderRadius: BorderRadius.circular(8),
                     borderSide: BorderSide(color: Colors.white),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(
-                      color: Colors.white,
-                    ), // border color when not focused
+                    borderSide: BorderSide(color: Colors.white),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(
-                      color: Colors.white,
-                    ), // border color when focused
+                    borderSide: BorderSide(color: Colors.white),
                   ),
-                  suffixIcon: Icon(
-                    Icons.remove_red_eye_outlined,
-                    color: Colors.white,
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _passwordVisible
+                          ? Icons.visibility_off_outlined
+                          : Icons.remove_red_eye_outlined,
+                      color: Colors.white,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _passwordVisible = !_passwordVisible;
+                      });
+                    },
                   ),
                 ),
                 style: GoogleFonts.poppins(fontSize: 16, color: Colors.white),
               ),
               SizedBox(height: 30),
               TextField(
-                controller: textController,
+                controller: confirmPasswordController,
+                obscureText: !_confirmPasswordVisible,
                 cursorColor: Colors.white,
                 decoration: InputDecoration(
                   prefixIcon: Icon(Icons.lock_outline, color: Colors.white),
@@ -115,39 +182,45 @@ class SignIn extends StatelessWidget {
                     fontSize: 16,
                     color: Colors.white,
                   ),
-
                   border: OutlineInputBorder(
-                    // Border style
                     borderRadius: BorderRadius.circular(8),
                     borderSide: BorderSide(color: Colors.white),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(
-                      color: Colors.white,
-                    ), // border color when not focused
+                    borderSide: BorderSide(color: Colors.white),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(
-                      color: Colors.white,
-                    ), // border color when focused
+                    borderSide: BorderSide(color: Colors.white),
                   ),
-                  suffixIcon: Icon(
-                    Icons.remove_red_eye_outlined,
-                    color: Colors.white,
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _confirmPasswordVisible
+                          ? Icons.visibility_off_outlined
+                          : Icons.remove_red_eye_outlined,
+                      color: Colors.white,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _confirmPasswordVisible = !_confirmPasswordVisible;
+                      });
+                    },
                   ),
                 ),
                 style: GoogleFonts.poppins(fontSize: 16, color: Colors.white),
               ),
+              if (_error.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Text(
+                    _error,
+                    style: GoogleFonts.poppins(color: Colors.red),
+                  ),
+                ),
               SizedBox(height: 50),
               FilledButton(
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => HomePage()),
-                  );
-                },
+                onPressed: _isLoading ? null : _handleSendOtp,
                 style: FilledButton.styleFrom(
                   backgroundColor: Colors.white,
                   minimumSize: Size(double.infinity, 50),
@@ -155,14 +228,20 @@ class SignIn extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                child: Text(
-                  "Sign up",
-                  style: GoogleFonts.poppins(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
-                ),
+                child: _isLoading
+                    ? SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(),
+                      )
+                    : Text(
+                        "Sign up",
+                        style: GoogleFonts.poppins(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
               ),
               SizedBox(height: 30),
               Row(
@@ -235,6 +314,7 @@ class SignIn extends StatelessWidget {
                   ],
                 ),
               ),
+              SizedBox(height: 20),
             ],
           ),
         ),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:quiz_app/features/home_page/screens/home_page.dart';
+import 'package:quiz_app/features/home_page/screens/QuizDashboard.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class Profile extends StatefulWidget {
@@ -56,7 +56,7 @@ class _ProfileState extends State<Profile> {
             onPressed: () {
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (context) => const HomePage()),
+                MaterialPageRoute(builder: (context) => const Quizdashboard()),
               );
             },
             style: FilledButton.styleFrom(

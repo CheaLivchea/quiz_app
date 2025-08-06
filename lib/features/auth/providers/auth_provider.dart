@@ -49,6 +49,54 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<bool> sendOTPForReset({required String phoneNumber}) async {
+    try {
+      final result = await _authService.sendOTPForReset(phoneNumber);
+
+      if (result['success']) {
+        _state = AuthState(error: null);
+        notifyListeners();
+        return true;
+      } else {
+        _state = AuthState(error: result['message']);
+        notifyListeners();
+        return false;
+      }
+    } catch (e) {
+      _state = AuthState(error: e.toString());
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> resetPassword({
+    required String phoneNumber,
+    required String otp,
+    required String newPassword,
+  }) async {
+    try {
+      final result = await _authService.resetPassword(
+        phoneNumber,
+        otp,
+        newPassword,
+      );
+
+      if (result['success']) {
+        _state = AuthState(error: null);
+        notifyListeners();
+        return true;
+      } else {
+        _state = AuthState(error: result['message']);
+        notifyListeners();
+        return false;
+      }
+    } catch (e) {
+      _state = AuthState(error: e.toString());
+      notifyListeners();
+      return false;
+    }
+  }
+
   Future<void> checkAuthState() async {
     final isValid = await _tokenManager.isTokenValid();
     final token = await _tokenManager.getToken();

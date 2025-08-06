@@ -4,9 +4,44 @@ import 'package:quiz_app/features/leaderboard/widgets/profile_grade.dart';
 import 'dart:math';
 
 import 'package:quiz_app/features/leaderboard/widgets/profilebar.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
-class Ranking extends StatelessWidget {
+class Ranking extends StatefulWidget {
   const Ranking({super.key});
+
+  @override
+  State<Ranking> createState() => _RankingState();
+}
+
+class _RankingState extends State<Ranking> {
+  bool _isLoading = true;
+  List<Map<String, String>> leaderboard = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchLeaderboard();
+  }
+
+  Future<void> _fetchLeaderboard() async {
+    // Simulate API call delay
+    await Future.delayed(Duration(seconds: 2));
+    leaderboard = [
+      {"num": "1", "name": "Peter Parker", "score": "80"},
+      {"num": "2", "name": "Natasha Romanoff", "score": "78"},
+      {"num": "3", "name": "Steve Rogers", "score": "75"},
+      {"num": "4", "name": "Bruce Banner", "score": "73"},
+      {"num": "5", "name": "Wanda Maximoff", "score": "71"},
+      {"num": "6", "name": "Clint Barton", "score": "69"},
+      {"num": "7", "name": "Stephen Strange", "score": "68"},
+      {"num": "8", "name": "Scott Lang", "score": "66"},
+      {"num": "9", "name": "Carol Danvers", "score": "64"},
+      {"num": "10", "name": "Nick Fury", "score": "62"},
+    ];
+    setState(() {
+      _isLoading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,101 +84,38 @@ class Ranking extends StatelessWidget {
                   ),
                 ],
               ),
-              ProfileGrade(
-                name: 'Peter Parker',
-                imagePath: "assets/images/images-removebg-preview.png",
-                grade: '1',
-              ),
-              SizedBox(height: 20),
-              Transform.rotate(
-                angle: 3 * pi / 100,
-                child: Container(
-                  width: 150,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: Colors.amber,
-                    borderRadius: BorderRadius.circular(25),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                        "Champion",
-                        style: GoogleFonts.poppins(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+              _isLoading
+                  ? Skeletonizer(
+                      child: Column(
+                        children: List.generate(
+                          10,
+                          (index) => Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            child: Container(
+                              height: 60,
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                          ),
                         ),
                       ),
-                    ],
-                  ),
-                ),
-              ),
-              SizedBox(height: 20),
-              Profilebar(
-                num: '2',
-                name: "Natasha Romanoff",
-                imagePath: "assets/images/images-removebg-preview.png",
-                score: "78",
-              ),
-              SizedBox(height: 12),
-              Profilebar(
-                num: '3',
-                name: "Steve Rogers",
-                imagePath: "assets/images/images-removebg-preview.png",
-                score: "75",
-              ),
-              SizedBox(height: 12),
-              Profilebar(
-                num: '4',
-                name: "Bruce Banner",
-                imagePath: "assets/images/images-removebg-preview.png",
-                score: "73",
-              ),
-              SizedBox(height: 12),
-              Profilebar(
-                num: '5',
-                name: "Wanda Maximoff",
-                imagePath: "assets/images/images-removebg-preview.png",
-                score: "71",
-              ),
-              SizedBox(height: 12),
-              Profilebar(
-                num: '6',
-                name: "Clint Barton",
-                imagePath: "assets/images/images-removebg-preview.png",
-                score: "69",
-              ),
-              SizedBox(height: 12),
-              Profilebar(
-                num: '7',
-                name: "Stephen Strange",
-                imagePath: "assets/images/images-removebg-preview.png",
-                score: "68",
-              ),
-              SizedBox(height: 12),
-              Profilebar(
-                num: '8',
-                name: "Scott Lang",
-                imagePath: "assets/images/images-removebg-preview.png",
-                score: "66",
-              ),
-              SizedBox(height: 12),
-              Profilebar(
-                num: '9',
-                name: "Carol Danvers",
-                imagePath: "assets/images/images-removebg-preview.png",
-                score: "64",
-              ),
-              SizedBox(height: 12),
-              Profilebar(
-                num: '10',
-                name: "Nick Fury",
-                imagePath: "assets/images/images-removebg-preview.png",
-                score: "62",
-              ),
-              SizedBox(height: 12),
+                    )
+                  : Column(
+                      children: leaderboard
+                          .map(
+                            (item) => Profilebar(
+                              num: item["num"]!,
+                              name: item["name"]!,
+                              imagePath:
+                                  "assets/images/images-removebg-preview.png",
+                              score: item["score"]!,
+                            ),
+                          )
+                          .toList(),
+                    ),
             ],
           ),
         ),

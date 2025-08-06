@@ -4,7 +4,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:quiz_app/features/auth/providers/auth_provider.dart';
 import 'package:quiz_app/features/auth/screens/sign_in.dart';
-import 'package:quiz_app/features/home_page/screens/home_page.dart';
+import 'package:quiz_app/features/home_page/screens/QuizDashboard.dart';
+import 'package:quiz_app/features/auth/screens/resetPassword.dart'; // Import the Resetpassword screen
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -31,21 +32,19 @@ class _LoginState extends State<Login> {
       String phoneNumber = phoneNumberController.text.trim();
       if (phoneNumber.startsWith('0')) {
         phoneNumber = phoneNumber.substring(1);
-        
       }
-      
+
       bool success = await authProvider.login(
         phoneNumber,
         passwordController.text.trim(),
       );
-      
 
       if (!mounted) return;
 
       if (success) {
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => const HomePage()),
+          MaterialPageRoute(builder: (context) => const Quizdashboard()),
           (route) => false,
         );
       } else {
@@ -54,8 +53,6 @@ class _LoginState extends State<Login> {
         );
       }
     } catch (e) {
-     
-
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Error: $e')));
@@ -172,11 +169,23 @@ class _LoginState extends State<Login> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Text(
-                    "Forgot password?",
-                    style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      color: Colors.white,
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => Resetpassword(),
+                        ),
+                      );
+                    },
+                    child: Text(
+                      "Forgot password?",
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        color: Colors.white,
+                        decoration: TextDecoration.underline,
+                        decorationColor: Colors.white,
+                      ),
                     ),
                   ),
                 ],

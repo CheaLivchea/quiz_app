@@ -3,10 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:quiz_app/features/auth/providers/auth_provider.dart';
 import 'package:quiz_app/features/auth/screens/login.dart';
-import 'package:quiz_app/features/auth/screens/send_otp.dart';
 import 'package:quiz_app/features/auth/services/auth_service.dart';
 import 'package:quiz_app/features/auth/utils/token_manager.dart';
-import 'package:quiz_app/features/home_page/screens/home_page.dart';
+import 'package:quiz_app/features/home_page/screens/QuizDashboard.dart';
 import 'package:quiz_app/shared/services/http_overrides.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
@@ -51,15 +50,14 @@ class _MyAppState extends State<MyApp> {
         scaffoldBackgroundColor: Color(0xFF6A3FC6),
         brightness: Brightness.light,
       ),
-      // home: Consumer<AuthProvider>(
-      //   builder: (context, auth, _) {
-      //     if (auth.isAuthenticated) {
-      //       return HomePage();
-      //     }
-      //     return Login();
-      //   },
-      // ),
-      home: SendOTP(),
+      home: Consumer<AuthProvider>(
+        builder: (context, auth, _) {
+          if (auth.isAuthenticated) {
+            return Quizdashboard();
+          }
+          return Login();
+        },
+      ),
     );
   }
 }
