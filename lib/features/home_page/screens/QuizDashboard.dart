@@ -7,6 +7,7 @@ import 'package:quiz_app/features/home_page/services/home_service.dart';
 import 'package:quiz_app/models/home_data.dart';
 import 'package:quiz_app/features/profile/services/user_service.dart';
 import 'package:quiz_app/features/profile/models/user_data.dart';
+import 'package:quiz_app/features/profile/screens/profile.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class Quizdashboard extends StatefulWidget {
@@ -405,15 +406,30 @@ class _QuizdashboardState extends State<Quizdashboard> {
             padding: EdgeInsets.all(20),
             child: Row(
               children: [
-                // Profile Picture
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(25),
-                  child: SizedBox(
-                    width: 50,
-                    height: 50,
-                    child: Image.asset(
-                      'assets/images/my_profile.jpg',
-                      fit: BoxFit.cover,
+                // Profile Picture (tappable)
+                GestureDetector(
+                  onTap: () async {
+                    // Navigate to profile page and refresh user data on return
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const Profile()),
+                    );
+                    // Always refresh user data after returning from profile
+                    setState(() {
+                      _userData = null;
+                      _isUserLoading = true;
+                    });
+                    await _fetchUserData();
+                  },
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(25),
+                    child: SizedBox(
+                      width: 50,
+                      height: 50,
+                      child: Image.asset(
+                        'assets/images/my_profile.jpg',
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
                 ),
@@ -426,7 +442,16 @@ class _QuizdashboardState extends State<Quizdashboard> {
                       Text(
                         _isUserLoading
                             ? "Hello, User!"
-                            : "Hello, ${_userData?.displayName ?? 'User'}!",
+                            : "Hello, " +
+                                  ((_userData?.firstName ?? '').trim() +
+                                          (_userData?.lastName != null &&
+                                                  _userData!.lastName
+                                                      .trim()
+                                                      .isNotEmpty
+                                              ? ' ' + _userData!.lastName.trim()
+                                              : ''))
+                                      .trim() +
+                                  "!",
                         style: GoogleFonts.poppins(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
@@ -603,7 +628,8 @@ class _QuizdashboardState extends State<Quizdashboard> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const QuizScreen(),
+                        builder: (context) =>
+                            QuizScreen(categoryId: 1), // Default category
                       ),
                     );
                   },

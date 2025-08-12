@@ -1,11 +1,9 @@
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:quiz_app/features/auth/widgets/logout.dart';
 import 'package:quiz_app/features/profile/screens/profile.dart';
 import 'package:quiz_app/features/quiz/screens/quiz_screen.dart';
 import 'package:quiz_app/features/leaderboard/screens/leaderboard.dart';
-
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -172,7 +170,6 @@ class HomePage extends StatelessWidget {
                   ),
                   SizedBox(height: 300),
                   Logout(),
-                
                 ],
               ),
             ),
@@ -221,7 +218,8 @@ class HomePage extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const QuizScreen(),
+                              builder: (context) =>
+                                  QuizScreen(categoryId: 1), // Default category
                             ),
                           );
                         },

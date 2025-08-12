@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:quiz_app/features/quiz/screens/quiz_screen.dart';
 
 class ServiceCard extends StatelessWidget {
   final String title;
@@ -8,7 +7,7 @@ class ServiceCard extends StatelessWidget {
   final String? iconUrl;
   final int? categoryId;
   final Color color;
-  final VoidCallback? onTap;
+  final VoidCallback onTap;
 
   const ServiceCard({
     super.key,
@@ -17,7 +16,7 @@ class ServiceCard extends StatelessWidget {
     this.iconUrl,
     this.categoryId,
     required this.color,
-    this.onTap,
+    required this.onTap,
   });
 
   @override
@@ -38,14 +37,7 @@ class ServiceCard extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
-          onTap:
-              onTap ??
-              () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const QuizScreen()),
-                );
-              },
+          onTap: onTap,
           child: Padding(
             padding: EdgeInsets.all(20),
             child: Column(

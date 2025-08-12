@@ -1,31 +1,19 @@
-// To parse this JSON data, do
-//
-//     final question = questionFromJson(jsonString);
+// Update your existing Question model to handle the new API response structure
+// Add these methods to your existing Question class:
 
 import 'dart:convert';
 
-List<Question> questionFromJson(String str) =>
-    List<Question>.from(json.decode(str).map((x) => Question.fromJson(x)));
-
-String questionToJson(List<Question> data) =>
-    json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
-
 class Question {
-  int id;
-  dynamic code;
-  String questionEn;
-  dynamic questionKh;
-  dynamic questionZh;
-  String answerCode;
-  List<String> optionEn;
-  dynamic optionKh;
-  dynamic optionZh;
-  int categoryId;
-
-  @override
-  String toString() {
-    return 'Question(id: $id, questionEn: "$questionEn", answerCode: "$answerCode", optionEn: $optionEn)';
-  }
+  final int id;
+  final String code;
+  final String questionEn;
+  final String questionKh;
+  final String questionZh;
+  final String answerCode;
+  final List<String> optionEn;
+  final List<String> optionKh;
+  final List<String> optionZh;
+  final int categoryId;
 
   Question({
     required this.id,
@@ -40,39 +28,73 @@ class Question {
     required this.categoryId,
   });
 
-  factory Question.fromJson(Map<String, dynamic> json) => Question(
-    id: int.tryParse(json["id"].toString()) ?? 0,
-    code: json["code"],
-    questionEn: json["questionEn"] ?? "", // fallback to empty string
-    questionKh: json["questionKh"],
-    questionZh: json["questionZh"],
-    answerCode: json["answerCode"] ?? "",
-    optionEn: json["optionEn"] != null
-        ? List<String>.from(json["optionEn"].map((x) => x.toString()))
-        : [],
-    optionKh: json["optionKh"] != null
-        ? List<String>.from(json["optionKh"].map((x) => x.toString()))
-        : null,
-    optionZh: json["optionZh"] != null
-        ? List<String>.from(json["optionZh"].map((x) => x.toString()))
-        : null,
-    categoryId: int.tryParse(json["categoryId"].toString()) ?? 0,
-  );
+  factory Question.fromJson(Map<String, dynamic> json) {
+    // Helper function to safely convert options to List<String>
+    List<String> parseOptions(dynamic options) {
+      if (options is List) {
+        return options.map((option) => option.toString()).toList();
+      }
+      return [];
+    }
 
-  Map<String, dynamic> toJson() => {
-    "id": id,
-    "code": code,
-    "questionEn": questionEn,
-    "questionKh": questionKh,
-    "questionZh": questionZh,
-    "answerCode": answerCode,
-    "optionEn": List<dynamic>.from(optionEn.map((x) => x)),
-    "optionKh": optionKh != null
-        ? List<dynamic>.from(optionKh.map((x) => x))
-        : null,
-    "optionZh": optionZh != null
-        ? List<dynamic>.from(optionZh.map((x) => x))
-        : null,
-    "categoryId": categoryId,
-  };
+    return Question(
+      id: json['id'] ?? 0,
+      code: json['code'] ?? '',
+      questionEn: json['questionEn'] ?? '',
+      questionKh: json['questionKh'] ?? '',
+      questionZh: json['questionZh'] ?? '',
+      answerCode: json['answerCode'] ?? '',
+      optionEn: parseOptions(json['optionEn']),
+      optionKh: parseOptions(json['optionKh']),
+      optionZh: parseOptions(json['optionZh']),
+      categoryId: json['categoryId'] ?? 0,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'code': code,
+      'questionEn': questionEn,
+      'questionKh': questionKh,
+      'questionZh': questionZh,
+      'answerCode': answerCode,
+      'optionEn': optionEn,
+      'optionKh': optionKh,
+      'optionZh': optionZh,
+      'categoryId': categoryId,
+    };
+  }
+
+  // Helper methods for multi-language support
+  String getQuestion(String locale) {
+    switch (locale) {
+      case 'zh':
+        return questionZh.isNotEmpty ? questionZh : questionEn;
+      case 'kh':
+        return questionKh.isNotEmpty ? questionKh : questionEn;
+      default:
+        return questionEn;
+    }
+  }
+
+  List<String> getOptions(String locale) {
+    switch (locale) {
+      case 'zh':
+        return optionZh.isNotEmpty ? optionZh : optionEn;
+      case 'kh':
+        return optionKh.isNotEmpty ? optionKh : optionEn;
+      default:
+        return optionEn;
+    }
+  }
 }
+
+// Helper functions for JSON parsing
+List<Question> questionFromJson(String str) {
+  final List<dynamic> jsonList = json.decode(str);
+  return jsonList.map((json) => Question.fromJson(json)).toList();
+}
+
+String questionToJson(List<Question> data) =>
+    json.encode(data.map((question) => question.toJson()).toList());

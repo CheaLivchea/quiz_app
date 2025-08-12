@@ -1,3 +1,4 @@
+import 'package:quiz_app/features/quiz/screens/quiz_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:quiz_app/features/home_page/widgets/service_card.dart';
@@ -44,6 +45,19 @@ class ServicesGrid extends StatelessWidget {
                       iconUrl: category.iconUrl,
                       categoryId: category.id,
                       color: _getColorForIndex(index),
+                      onTap: () {
+                        // Pass the category name and locale to QuizScreen
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => QuizScreen(
+                              categoryId: category.id,
+                              categoryName: category.getName(locale),
+                              locale: locale, // Pass current locale
+                            ),
+                          ),
+                        );
+                      },
                     );
                   },
                 ),

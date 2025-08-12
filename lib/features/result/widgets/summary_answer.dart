@@ -6,19 +6,25 @@ class SummaryAnswer extends StatelessWidget {
     super.key,
     required this.question,
     required this.userAnswer,
-    required this.answer,
+    required this.userAnswerCode,
+    required this.answerCode,
+    required this.answerText,
     required this.index,
   });
   final String question;
   final String userAnswer;
-  final String answer;
+  final String userAnswerCode;
+  final String answerCode;
+  final String answerText;
   final String index;
 
   @override
   Widget build(BuildContext context) {
+    // Only show code if answerCode is a single letter (A-D/a-d)
+    bool isLetterCode =
+        answerCode.length == 1 && RegExp(r'^[A-Za-z]$').hasMatch(answerCode);
     return Container(
       width: 330,
-
       padding: EdgeInsets.symmetric(horizontal: 10, vertical: 3),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -36,7 +42,9 @@ class SummaryAnswer extends StatelessWidget {
             children: [
               Flexible(
                 child: Text(
-                  "Your Answer: $userAnswer",
+                  isLetterCode
+                      ? "Your Answer: $userAnswerCode. $userAnswer"
+                      : "Your Answer: $userAnswer",
                   style: GoogleFonts.poppins(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
@@ -46,21 +54,24 @@ class SummaryAnswer extends StatelessWidget {
                 ),
               ),
               SizedBox(width: 8),
-              userAnswer == answer
+              (isLetterCode
+                      ? userAnswerCode.toUpperCase() == answerCode.toUpperCase()
+                      : userAnswer.trim().toLowerCase() ==
+                            answerCode.trim().toLowerCase())
                   ? Icon(Icons.check, color: Colors.green)
                   : Icon(Icons.close, color: Colors.red),
             ],
           ),
-
           SizedBox(height: 10),
           Text(
-            "Correct Answer: $answer",
+            isLetterCode
+                ? "Correct Answer: $answerCode. $answerText"
+                : "Correct Answer: $answerText",
             style: GoogleFonts.poppins(
               fontSize: 15,
               fontWeight: FontWeight.w600,
             ),
           ),
-          Divider(thickness: 2.0),
         ],
       ),
     );
