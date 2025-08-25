@@ -19,6 +19,11 @@ class ServiceCard extends StatelessWidget {
     required this.onTap,
   });
 
+  bool _isKhmer(String text) {
+    // Simple check: if text contains Khmer Unicode range
+    return text.runes.any((r) => r >= 0x1780 && r <= 0x17FF);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -27,51 +32,41 @@ class ServiceCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: color.withOpacity(0.1),
             blurRadius: 8,
             offset: Offset(0, 2),
           ),
         ],
       ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: onTap,
-          child: Padding(
-            padding: EdgeInsets.all(20),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  padding: EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: color.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: _buildIcon(),
-                ),
-                SizedBox(height: 12),
-                Text(
-                  title,
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.roboto(
-                    // Better font for Khmer text
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.08),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: _buildIcon(),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            style: _isKhmer(title)
+                ? GoogleFonts.notoSansKhmer(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  )
+                : GoogleFonts.roboto(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF2D2D2D),
-                    height:
-                        title.contains('ខ') ||
-                            title.contains('ត') ||
-                            title.contains('ស')
-                        ? 1.4
-                        : 1.2, // Better line height for Khmer
+                    color: const Color(0xFF2D2D2D),
+                    height: 1.2,
                   ),
-                ),
-              ],
-            ),
           ),
-        ),
+        ],
       ),
     );
   }

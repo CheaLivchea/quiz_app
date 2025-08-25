@@ -3,6 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:quiz_app/features/auth/widgets/logout.dart';
 import 'package:quiz_app/features/profile/screens/profile.dart';
 import 'package:quiz_app/features/leaderboard/screens/leaderboard_page.dart';
+import 'package:provider/provider.dart';
+import 'package:quiz_app/features/profile/providers/user_provider.dart';
 
 class CustomBottomNav extends StatelessWidget {
   final int currentIndex;
@@ -79,9 +81,14 @@ class CustomBottomNav extends StatelessWidget {
         break;
       case 2:
         // Leaderboard - Navigate to new page
+        final userProvider = Provider.of<UserProvider>(context, listen: false);
+        final currentUserId = userProvider.userData?.id;
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const LeaderboardScreen()),
+          MaterialPageRoute(
+            builder: (context) =>
+                LeaderboardScreen(currentUserId: currentUserId),
+          ),
         ).then((_) {
           // Reset to home tab when returning from leaderboard
           onTap(0);

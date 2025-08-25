@@ -2,13 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:quiz_app/features/quiz/screens/quiz_screen.dart';
 import 'package:quiz_app/features/home_page/widgets/services_grid.dart';
+import 'package:quiz_app/features/home_page/widgets/banner_carousel.dart';
 import 'package:quiz_app/features/home_page/widgets/custom_bottom_nav.dart';
 import 'package:quiz_app/features/home_page/services/home_service.dart';
 import 'package:quiz_app/models/home_data.dart';
 import 'package:quiz_app/features/profile/services/user_service.dart';
 import 'package:quiz_app/features/profile/models/user_data.dart';
+import 'package:provider/provider.dart';
+import 'package:quiz_app/features/profile/providers/user_provider.dart';
 import 'package:quiz_app/features/profile/screens/profile.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Quizdashboard extends StatefulWidget {
   const Quizdashboard({super.key});
@@ -18,11 +22,18 @@ class Quizdashboard extends StatefulWidget {
 }
 
 class _QuizdashboardState extends State<Quizdashboard> {
+  Future<void> _loadUserDataToProvider() async {
+    final userService = UserService();
+    final result = await userService.getUserInfo();
+    if (result['success']) {
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      userProvider.setUser(result['data'] as UserData);
+    }
+  }
+
   int _currentIndex = 0;
   HomeData? _homeData;
-  UserData? _userData;
   bool _isLoading = true;
-  bool _isUserLoading = true;
   String _errorMessage = '';
   String _currentLocale = 'en';
 
@@ -36,8 +47,20 @@ class _QuizdashboardState extends State<Quizdashboard> {
   @override
   void initState() {
     super.initState();
+    print('[QUIZDASHBOARD] initState called');
+    _loadLocale();
     _fetchHomepageData();
-    _fetchUserData();
+    _loadUserDataToProvider();
+  }
+
+  Future<void> _loadLocale() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? savedLocale = prefs.getString('quiz_locale');
+    if (savedLocale != null && _languages.containsKey(savedLocale)) {
+      setState(() {
+        _currentLocale = savedLocale;
+      });
+    }
   }
 
   Future<void> _fetchHomepageData() async {
@@ -67,36 +90,6 @@ class _QuizdashboardState extends State<Quizdashboard> {
         _errorMessage = 'Error: $e';
         _isLoading = false;
       });
-    }
-  }
-
-  Future<void> _fetchUserData() async {
-    // Only load if we don't have user data yet
-    if (_userData != null) return;
-
-    try {
-      final userService = UserService();
-      final result = await userService.getUserInfo();
-
-      if (result['success']) {
-        setState(() {
-          _userData = result['data'] as UserData;
-          _isUserLoading = false;
-        });
-
-        // Debug print
-        print('User loaded: ${_userData?.displayName ?? 'Unknown'}');
-      } else {
-        setState(() {
-          _isUserLoading = false;
-        });
-        print('Failed to load user data: ${result['message']}');
-      }
-    } catch (e) {
-      setState(() {
-        _isUserLoading = false;
-      });
-      print('Error loading user: $e');
     }
   }
 
@@ -156,86 +149,11 @@ class _QuizdashboardState extends State<Quizdashboard> {
                     color: Colors.grey[300],
                   ),
                 ),
-                SizedBox(width: 15),
-                // Greeting Skeleton
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        width: 120,
-                        height: 24,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      Container(
-                        width: 180,
-                        height: 14,
-                        decoration: BoxDecoration(
-                          color: Colors.white70,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                // Notification Icon Skeleton
-                Container(
-                  width: 24,
-                  height: 24,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
               ],
             ),
           ),
-
-          // Stats Card Skeleton
-          Container(
-            margin: EdgeInsets.symmetric(horizontal: 20),
-            padding: EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.1),
-                  blurRadius: 10,
-                  offset: Offset(0, 5),
-                ),
-              ],
-            ),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      width: 120,
-                      height: 16,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[300],
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 20),
-                Row(
-                  children: [
-                    Expanded(child: _buildSkeletonStatItem()),
-                    SizedBox(width: 15),
-                    Expanded(child: _buildSkeletonStatItem()),
-                  ],
-                ),
-              ],
-            ),
-          ),
+          // Banner Carousel
+          BannerCarousel(),
 
           SizedBox(height: 30),
 
@@ -397,6 +315,25 @@ class _QuizdashboardState extends State<Quizdashboard> {
     );
   }
 
+  String _getDisplayName(BuildContext context) {
+    final userData = Provider.of<UserProvider>(context).userData;
+    if (userData == null) return "User";
+    final firstName = userData.firstName.trim();
+    final lastName = userData.lastName.trim();
+    String fullName = '';
+    if (firstName.isNotEmpty) {
+      fullName = firstName;
+      if (lastName.isNotEmpty) {
+        fullName += ' $lastName';
+      }
+    } else if (lastName.isNotEmpty) {
+      fullName = lastName;
+    } else {
+      fullName = "User";
+    }
+    return fullName;
+  }
+
   Widget _buildMainContent() {
     return SingleChildScrollView(
       child: Column(
@@ -409,17 +346,22 @@ class _QuizdashboardState extends State<Quizdashboard> {
                 // Profile Picture (tappable)
                 GestureDetector(
                   onTap: () async {
+                    print('[QUIZDASHBOARD] Profile picture tapped');
                     // Navigate to profile page and refresh user data on return
-                    await Navigator.push(
+                    final updated = await Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => const Profile()),
                     );
-                    // Always refresh user data after returning from profile
-                    setState(() {
-                      _userData = null;
-                      _isUserLoading = true;
-                    });
-                    await _fetchUserData();
+                    print(
+                      '[QUIZDASHBOARD] Returned from Profile, updated: $updated',
+                    );
+                    if (updated == true) {
+                      print(
+                        '[QUIZDASHBOARD] Detected profile update, refreshing user data in provider...',
+                      );
+                      await _loadUserDataToProvider();
+                      print('[QUIZDASHBOARD] UserProvider updated');
+                    }
                   },
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(25),
@@ -427,31 +369,20 @@ class _QuizdashboardState extends State<Quizdashboard> {
                       width: 50,
                       height: 50,
                       child: Image.asset(
-                        'assets/images/my_profile.jpg',
+                        'assets/images/profile3.jpg',
                         fit: BoxFit.cover,
                       ),
                     ),
                   ),
                 ),
                 SizedBox(width: 15),
-                // Greeting
+                // Greeting and manual refresh button
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        _isUserLoading
-                            ? "Hello, User!"
-                            : "Hello, " +
-                                  ((_userData?.firstName ?? '').trim() +
-                                          (_userData?.lastName != null &&
-                                                  _userData!.lastName
-                                                      .trim()
-                                                      .isNotEmpty
-                                              ? ' ' + _userData!.lastName.trim()
-                                              : ''))
-                                      .trim() +
-                                  "!",
+                        "Hello, ${_getDisplayName(context)}!",
                         style: GoogleFonts.poppins(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
@@ -508,61 +439,8 @@ class _QuizdashboardState extends State<Quizdashboard> {
             ),
           ),
 
-          // Stats Card
-          Container(
-            margin: EdgeInsets.symmetric(horizontal: 20),
-            padding: EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.1),
-                  blurRadius: 10,
-                  offset: Offset(0, 5),
-                ),
-              ],
-            ),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "Quiz Performance",
-                      style: GoogleFonts.poppins(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF2D2D2D),
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 20),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildStatItem(
-                        "Total Quizzes",
-                        "24",
-                        Icons.quiz,
-                        Color(0xFF4CAF50),
-                      ),
-                    ),
-                    SizedBox(width: 15),
-                    Expanded(
-                      child: _buildStatItem(
-                        "Best Score",
-                        "95%",
-                        Icons.star,
-                        Color(0xFFFF9800),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
+          // Banner Carousel
+          BannerCarousel(),
 
           SizedBox(height: 30),
 
@@ -628,8 +506,10 @@ class _QuizdashboardState extends State<Quizdashboard> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) =>
-                            QuizScreen(categoryId: 1), // Default category
+                        builder: (context) => QuizScreen(
+                          categoryId: 1,
+                          locale: _currentLocale,
+                        ), // Pass selected language
                       ),
                     );
                   },
@@ -743,33 +623,39 @@ class _QuizdashboardState extends State<Quizdashboard> {
                     color: _currentLocale == entry.key
                         ? Color(0xFF6A3FC6)
                         : Color(0xFF2D2D2D),
-                    height: entry.key == 'kh'
-                        ? 1.5
-                        : 1.2, // Better line height for Khmer
+                    height: entry.key == 'kh' ? 1.5 : 1.2,
                   ),
                 ),
                 subtitle: Text(
                   entry.value,
-                  style: GoogleFonts.roboto(
-                    // Use Roboto for better Khmer support
-                    fontSize: 14,
-                    color: Colors.grey[600],
-                    height: entry.key == 'kh' ? 1.4 : 1.2,
-                  ),
+                  style: entry.key == 'kh'
+                      ? GoogleFonts.notoSansKhmer(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                          height: 1.4,
+                        )
+                      : GoogleFonts.roboto(
+                          fontSize: 14,
+                          fontWeight: FontWeight.normal,
+                          color: Colors.grey[600],
+                          height: 1.2,
+                        ),
                 ),
                 trailing: _currentLocale == entry.key
                     ? Icon(Icons.check_circle, color: Color(0xFF6A3FC6))
                     : null,
-                onTap: () {
+                onTap: () async {
                   setState(() {
                     _currentLocale = entry.key;
                   });
+                  SharedPreferences prefs =
+                      await SharedPreferences.getInstance();
+                  await prefs.setString('quiz_locale', entry.key);
                   Navigator.pop(context);
                 },
               );
             }).toList(),
-
-            SizedBox(height: 20),
           ],
         ),
       ),

@@ -2,8 +2,21 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:quiz_app/features/auth/utils/token_manager.dart';
-
+import 'package:quiz_app/features/profile/services/user_service.dart';
+import 'package:quiz_app/features/profile/models/user_data.dart';
 class LeaderboardService {
+  /// Print current user ID using UserService
+  static Future<void> printCurrentUserId() async {
+    final userService = UserService();
+    final result = await userService.getUserInfo();
+    if (result['success'] == true && result['data'] != null) {
+      final user = result['data'] as UserData;
+      print('Current user ID: ${user.id}');
+    } else {
+      print('Failed to get current user ID: ${result['message']}');
+    }
+  }
+
   static final String _topPlayerUrl = dotenv.env['TOP_PLAYER'] ?? '';
 
   /// Fetch top 10 players from the API

@@ -4,6 +4,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:quiz_app/features/profile/services/user_service.dart';
 import 'package:quiz_app/features/profile/models/user_data.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:provider/provider.dart';
+import 'package:quiz_app/features/profile/providers/user_provider.dart';
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -121,6 +123,7 @@ class _ProfileState extends State<Profile> with TickerProviderStateMixin {
         ),
       ),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
             decoration: BoxDecoration(
@@ -143,6 +146,7 @@ class _ProfileState extends State<Profile> with TickerProviderStateMixin {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     Text(
                       label,
@@ -625,7 +629,7 @@ class _ProfileState extends State<Profile> with TickerProviderStateMixin {
                                     child: CircleAvatar(
                                       radius: 60,
                                       backgroundImage: AssetImage(
-                                        "assets/images/my_profile.jpg",
+                                        "assets/images/profile3.jpg",
                                       ),
                                     ),
                                   ),
@@ -639,35 +643,10 @@ class _ProfileState extends State<Profile> with TickerProviderStateMixin {
                                       letterSpacing: 1.2,
                                     ),
                                   ),
-                                  SizedBox(height: 6),
-                                  Container(
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: 16,
-                                      vertical: 8,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white.withOpacity(0.2),
-                                      borderRadius: BorderRadius.circular(20),
-                                    ),
-                                    child: Text(
-                                      (_userData?.username == null ||
-                                              (_userData?.username
-                                                      ?.trim()
-                                                      .isEmpty ??
-                                                  true))
-                                          ? "-"
-                                          : _userData!.username!,
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w500,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ),
+                                  SizedBox(height: 5),
                                 ],
                               ),
                             ),
-                            SizedBox(height: 20),
 
                             // Stats Card
                             _userData == null
@@ -675,42 +654,48 @@ class _ProfileState extends State<Profile> with TickerProviderStateMixin {
                                 : Container(
                                     margin: EdgeInsets.symmetric(
                                       horizontal: 20,
-                                      vertical: 8,
+                                      vertical: 1,
                                     ),
-                                    padding: EdgeInsets.all(20),
-                                    decoration: BoxDecoration(
-                                      color: Color(0xFF6A3FC6),
-                                      borderRadius: BorderRadius.circular(20),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Color(
-                                            0xFF6A3FC6,
-                                          ).withOpacity(0.3),
-                                          blurRadius: 20,
-                                          offset: Offset(0, 10),
-                                        ),
-                                      ],
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 20,
                                     ),
+                                    // decoration: BoxDecoration(
+                                    //   color: Color(0xFF6A3FC6),
+                                    //   borderRadius: BorderRadius.circular(20),
+                                    //   boxShadow: [
+                                    //     BoxShadow(
+                                    //       color: Color(
+                                    //         0xFF6A3FC6,
+                                    //       ).withOpacity(0.3),
+                                    //       blurRadius: 20,
+                                    //       offset: Offset(0, 10),
+                                    //     ),
+                                    //   ],
+                                    // ),
                                     child: Row(
                                       mainAxisAlignment:
-                                          MainAxisAlignment.spaceAround,
+                                          MainAxisAlignment.center,
                                       children: [
-                                        _buildStatItem(
-                                          "Profile ID",
-                                          "${_userData?.id ?? "-"}",
-                                          Icons.badge,
+                                        Expanded(
+                                          child: _buildStatItem(
+                                            "Profile ID",
+                                            "${_userData?.id ?? "-"}",
+                                            Icons.badge,
+                                          ),
                                         ),
                                         Container(
                                           width: 1,
                                           height: 40,
                                           color: Colors.white30,
                                         ),
-                                        _buildStatItem(
-                                          "Member Since",
-                                          _userData != null
-                                              ? "${_userData!.createdAt.month}/${_userData!.createdAt.year}"
-                                              : "-",
-                                          Icons.calendar_month,
+                                        Expanded(
+                                          child: _buildStatItem(
+                                            "Member Since",
+                                            _userData != null
+                                                ? "${["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][_userData!.createdAt.month - 1]} ${_userData!.createdAt.year}"
+                                                : "-",
+                                            Icons.calendar_month,
+                                          ),
                                         ),
                                       ],
                                     ),
@@ -725,12 +710,15 @@ class _ProfileState extends State<Profile> with TickerProviderStateMixin {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    "Profile Details",
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 22,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
+                                  SizedBox(height: 20),
+                                  Center(
+                                    child: Text(
+                                      "Profile Details",
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
                                     ),
                                   ),
                                   SizedBox(height: 16),
@@ -906,7 +894,20 @@ class _ProfileState extends State<Profile> with TickerProviderStateMixin {
                                             }
 
                                             if (ok) {
+                                              print(
+                                                '[PROFILE] Profile updated, fetching user info for confirmation...',
+                                              );
                                               await _fetchUserInfo();
+                                              print(
+                                                '[PROFILE] User info after update: firstName=\${_userData?.firstName}, lastName=\${_userData?.lastName}',
+                                              );
+                                              // Update UserProvider with new user data
+                                              if (_userData != null) {
+                                                Provider.of<UserProvider>(
+                                                  context,
+                                                  listen: false,
+                                                ).setUser(_userData!);
+                                              }
                                               setState(() {
                                                 _editing = false;
                                                 _hasChanges = false;
@@ -922,6 +923,10 @@ class _ProfileState extends State<Profile> with TickerProviderStateMixin {
                                                   ),
                                                 ),
                                               );
+                                              Navigator.pop(
+                                                context,
+                                                true,
+                                              ); // Signal update to dashboard
                                             } else {
                                               setState(() => _saving = false);
                                               if (errorMsg != null) {

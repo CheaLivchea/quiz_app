@@ -2,7 +2,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:quiz_app/features/auth/screens/login.dart';
-import '../../home_page/screens/home_page.dart';
 import 'package:quiz_app/features/auth/screens/send_otp.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
